@@ -64,3 +64,10 @@ map plat23
 - No LocalXpose URL? Ensure `LOCALXPOSE_ACCESS_TOKEN` is set and the LocalXpose container can reach `unvanq-server`; check `docker compose logs localxpose`.
 - Custom config ignored? Verify the Docker volume has `$UNV_HOME/config/server.cfg` and it matches `UNV_SERVER_CFG`; otherwise the entrypoint just runs `+map plat23`.
 - Changed version/arch? Rebuild the image with new `UNV_VERSION`/`UNV_ARCH` build args before restarting the stack.
+
+## Joining from Steam (or any Quake3-style client)
+- Grab the public UDP endpoint from the dashboard (e.g., `udp://us.loclx.io:27960`).
+- In a Steam game launch option or console, append `+connect <endpoint>` (omit the `udp://` prefix), for example:
+  - Launch option: `+connect us.loclx.io:27960`
+  - In-game console: `\connect us.loclx.io:27960`
+- If you expose a different port (set `LOCALXPOSE_PORT` or use a reserved endpoint), connect to that port instead of `27960`.

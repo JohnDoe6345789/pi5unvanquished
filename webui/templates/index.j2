@@ -6,8 +6,9 @@
 <meta charset="utf-8"/>
 <title>Unvanquished Pi-5 Dashboard</title>
 
+<link rel="icon" type="image/svg+xml" href="/static/favicon.svg"/>
 <link rel="stylesheet"
- href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap"/>
+ href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&display=swap"/>
 <link rel="stylesheet"
  href="https://fonts.googleapis.com/icon?family=Material+Icons"/>
 
@@ -29,6 +30,32 @@
 window.API_STATUS_URL = "/api/status";
 window.API_LOCALXPOSE_URL = "/api/localxpose_status";
 </script>
+
+<style>
+  body {
+    margin: 0;
+    background: radial-gradient(circle at 20% 20%, rgba(45, 212, 191, 0.15), transparent 35%),
+                radial-gradient(circle at 80% 0%, rgba(14, 165, 233, 0.12), transparent 30%),
+                linear-gradient(135deg, #05070f 0%, #0c1426 45%, #05070f 100%);
+    color: #e2e8f0;
+  }
+  .hero {
+    position: relative;
+    overflow: hidden;
+    border-radius: 18px;
+    padding: 24px;
+    background: linear-gradient(135deg, rgba(45, 212, 191, 0.18), rgba(14, 165, 233, 0.08));
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 0 20px 50px rgba(0,0,0,0.35);
+  }
+  .hero::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(circle at 80% 20%, rgba(244, 114, 182, 0.16), transparent 35%);
+    pointer-events: none;
+  }
+</style>
 
 </head>
 <body style="margin:0;background:#000;">
@@ -53,7 +80,8 @@ function useServerData() {
       try {
         const r = await fetch(window.API_STATUS_URL);
         const j = await r.json();
-        if (!dead) setStatus({loading:false,error:"",data:j});
+        const err = j.error || "";
+        if (!dead) setStatus({loading:false,error:err,data:j});
       } catch(e) {
         if (!dead) setStatus(p => ({loading:false,error:String(e),data:p.data}));
       }
@@ -61,7 +89,8 @@ function useServerData() {
       try {
         const r = await fetch(window.API_LOCALXPOSE_URL);
         const j = await r.json();
-        if (!dead) setLx({loading:false,error:"",data:j});
+        const err = j.error || "";
+        if (!dead) setLx({loading:false,error:err,data:j});
       } catch(e) {
         if (!dead) setLx(p => ({loading:false,error:String(e),data:p.data}));
       }
@@ -96,128 +125,272 @@ function App() {
   const lxData = lx.data || {};
   const lxOnline = !!lxData.online;
   const lxUrl = lxData.public_url || "N/A";
+  const lxLog = lxData.log_tail || [];
+
+  const [panelOrder, setPanelOrder] = React.useState(["server", "localxpose"]);
+  const localHost = window.location.hostname || "localhost";
+  const fallbackEndpoint = `${localHost}:27960`;
+  const fallbackConnect = `+connect ${fallbackEndpoint}`;
+
+  const movePanel = (id, dir) => {
+    setPanelOrder(prev => {
+      const idx = prev.indexOf(id);
+      if (idx === -1) return prev;
+      const swapWith = dir === "up" ? idx - 1 : idx + 1;
+      if (swapWith < 0 || swapWith >= prev.length) return prev;
+      const next = [...prev];
+      [next[idx], next[swapWith]] = [next[swapWith], next[idx]];
+      return next;
+    });
+  };
 
   const theme = createTheme({
     palette: {
       mode: "dark",
-      primary: { main: "#4caf50" }
+      primary: { main: "#2dd4bf" },
+      secondary: { main: "#f97316" },
+      background: {
+        default: "#05070f",
+        paper: "rgba(15, 23, 42, 0.7)",
+      }
+    },
+    typography: {
+      fontFamily: "'Space Grotesk', 'Inter', 'Segoe UI', sans-serif",
+      h4: { fontWeight: 700, letterSpacing: "-0.03em" },
+      body1: { letterSpacing: "0.01em" },
     }
   });
+
+  const cardStyles = {
+    background: "rgba(15,23,42,0.75)",
+    border: "1px solid rgba(255,255,255,0.06)",
+    boxShadow: "0 15px 40px rgba(0,0,0,0.35)",
+    backdropFilter: "blur(8px)",
+  };
+
+  const chipStyles = {
+    color: "#e2e8f0",
+    borderColor: "rgba(255,255,255,0.2)",
+    background: "rgba(255,255,255,0.05)",
+  };
 
   const copyLocalxpose = () => {
     if (lxOnline && lxUrl !== "N/A")
       navigator.clipboard.writeText(lxUrl);
   };
 
+  const renderPanel = (id, idx) => {
+    if (id === "server") {
+      return (
+        <Card key="server" sx={cardStyles}>
+          <CardHeader
+            title="Game Server"
+            action={
+              <Stack direction="row" spacing={1} alignItems="center">
+                <StatusChip label="Server" online={serverOnline}/>
+                <Button
+                  size="small"
+                  variant="text"
+                  onClick={() => movePanel("server", "up")}
+                  disabled={idx === 0}
+                >
+                  Move up
+                </Button>
+                <Button
+                  size="small"
+                  variant="text"
+                  onClick={() => movePanel("server", "down")}
+                  disabled={idx === panelOrder.length - 1}
+                >
+                  Move down
+                </Button>
+              </Stack>
+            }
+          />
+          <CardContent>
+            {status.loading ? (
+              <Typography>Loading…</Typography>
+            ) : (
+            <>
+              {status.error && (
+                <Typography color="warning.main" sx={{mb:1}}>
+                  Server status error: {status.error}
+                </Typography>
+              )}
+              <Box sx={{
+                display:"grid",
+                gridTemplateColumns:"repeat(auto-fit, minmax(140px,1fr))",
+                gap:1, mb:1
+              }}>
+                <Box>
+                  <Typography variant="caption">Hostname</Typography>
+                  <Typography>{info.sv_hostname || "N/A"}</Typography>
+                </Box>
+                <Box>
+                  <Typography variant="caption">Map</Typography>
+                  <Typography>{info.mapname || "N/A"}</Typography>
+                </Box>
+                <Box>
+                  <Typography variant="caption">Game</Typography>
+                  <Typography>{info.gamename || "N/A"}</Typography>
+                </Box>
+                <Box>
+                  <Typography variant="caption">Players</Typography>
+                  <Typography>{players.length}</Typography>
+                </Box>
+              </Box>
+
+              {players.length > 0 && (
+                <Table size="small">
+                  <TableHead>
+                    <TableRow>
+                      <TableCell>#</TableCell>
+                      <TableCell>Name</TableCell>
+                      <TableCell>Score</TableCell>
+                      <TableCell>Ping</TableCell>
+                    </TableRow>
+                  </TableHead>
+                  <TableBody>
+                    {players.map((p,i) => (
+                      <TableRow key={i}>
+                        <TableCell>{i+1}</TableCell>
+                        <TableCell>{p.name}</TableCell>
+                        <TableCell>{p.score}</TableCell>
+                        <TableCell>{p.ping}</TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              )}
+            </>
+            )}
+          </CardContent>
+        </Card>
+      );
+    }
+
+    if (id === "localxpose") {
+      return (
+        <Card key="localxpose" sx={cardStyles}>
+          <CardHeader
+            title="LocalXpose Tunnel"
+            action={
+              <Stack direction="row" spacing={1} alignItems="center">
+                <StatusChip label="LocalXpose" online={lxOnline}/>
+                <Button
+                  size="small"
+                  variant="text"
+                  onClick={() => movePanel("localxpose", "up")}
+                  disabled={idx === 0}
+                >
+                  Move up
+                </Button>
+                <Button
+                  size="small"
+                  variant="text"
+                  onClick={() => movePanel("localxpose", "down")}
+                  disabled={idx === panelOrder.length - 1}
+                >
+                  Move down
+                </Button>
+              </Stack>
+            }
+          />
+          <CardContent>
+            <Typography variant="caption">Public UDP URL</Typography>
+            <Typography sx={{wordBreak:"break-all", mb:1}}>
+              {lxUrl}
+            </Typography>
+
+            <Stack direction="row" spacing={1}>
+              <Button
+                variant="contained"
+                color="primary"
+                size="small"
+                onClick={copyLocalxpose}
+                disabled={!lxOnline}
+              >
+                Copy LocalXpose Address
+              </Button>
+            </Stack>
+
+            {lxOnline ? (
+              <>
+                {lxLog.length > 0 && (
+                  <Box sx={{mt:1}}>
+                    <Typography variant="caption" color="text.secondary">Recent tunnel logs:</Typography>
+                    {lxLog.slice(-5).map((line, idx) => (
+                      <Typography key={idx} variant="caption" sx={{display:"block", color:"#ccc"}}>
+                        {line}
+                      </Typography>
+                    ))}
+                  </Box>
+                )}
+              </>
+            ) : (
+              <Box sx={{mt:2, p:2, border:"1px dashed rgba(255,255,255,0.18)", borderRadius:2, background:"rgba(255,255,255,0.02)"}}>
+                <Typography variant="subtitle2" sx={{mb:0.5, color:"#f97316"}}>
+                  Tunnel offline — use local fallback
+                </Typography>
+                {lx.error && (
+                  <Typography variant="body2" color="warning.main" sx={{mb:1, whiteSpace:"pre-line"}}>
+                    LocalXpose error: {lx.error}
+                  </Typography>
+                )}
+                <Typography variant="body2" sx={{color:"rgba(226,232,240,0.85)"}}>
+                  If you’re running Docker locally, expose the server’s UDP port on the host and connect directly:
+                </Typography>
+                <Typography variant="body2" sx={{mt:0.5, color:"rgba(226,232,240,0.85)"}}>
+                  1) Add a port mapping under <code>unvanq-server</code> in <code>compose.yml</code>: <code>ports: ["27960:27960/udp"]</code>, then restart.
+                </Typography>
+                <Typography variant="body2" sx={{mt:0.5, color:"rgba(226,232,240,0.85)"}}>
+                  2) Connect from Steam/console with <code>{fallbackConnect}</code> (omit <code>udp://</code>).
+                </Typography>
+                <Typography variant="caption" color="text.secondary">
+                  Tip: Use your LAN IP instead of localhost when connecting from another device.
+                </Typography>
+              </Box>
+            )}
+          </CardContent>
+        </Card>
+      );
+    }
+
+    return null;
+  };
+
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline/>
-      <Box sx={{py:4, bgcolor:"#000", minHeight:"100vh"}}>
+      <Box sx={{py:4, minHeight:"100vh"}}>
         <Container maxWidth="md">
 
-          <Typography variant="h4" gutterBottom>
-            Unvanquished Pi-5 Server Dashboard
-          </Typography>
-
-          <Stack direction="row" spacing={1} sx={{mb:2}}>
-            <Chip label="React" variant="outlined"/>
-            <Chip label="Material UI" variant="outlined"/>
-            <Chip label="Flask" variant="outlined"/>
-            <Chip label="Docker" variant="outlined"/>
-          </Stack>
+          <Box className="hero" sx={{mb:3, display:"flex", alignItems:"center", gap:2, position:"relative"}}>
+            <Box
+              component="img"
+              src="/static/logo.svg"
+              alt="Unvanquished logo"
+              sx={{width:72, height:72, zIndex:1, borderRadius:"12px", border:"1px solid rgba(255,255,255,0.08)"}}
+            />
+            <Box sx={{zIndex:1, flex:1}}>
+              <Typography variant="h4" gutterBottom>
+                Unvanquished Pi-5 Control Room
+              </Typography>
+              <Typography variant="body1" sx={{color:"rgba(226,232,240,0.9)"}}>
+                Live status for your server and tunnel. Reorder cards, inspect errors, and share the public UDP address.
+              </Typography>
+              <Stack direction="row" spacing={1} sx={{mt:2, flexWrap:"wrap"}}>
+                <Chip label="React 18" variant="outlined" sx={chipStyles}/>
+                <Chip label="Flask API" variant="outlined" sx={chipStyles}/>
+                <Chip label="Dockerized" variant="outlined" sx={chipStyles}/>
+                <Chip label="LocalXpose" variant="outlined" sx={chipStyles}/>
+              </Stack>
+            </Box>
+          </Box>
 
           <Stack spacing={2}>
 
-            <Card>
-              <CardHeader
-                title="Game Server"
-                action={<StatusChip label="Server" online={serverOnline}/>}
-              />
-              <CardContent>
-                {status.loading ? (
-                  <Typography>Loading…</Typography>
-                ) : (
-                <>
-                  <Box sx={{
-                    display:"grid",
-                    gridTemplateColumns:"repeat(auto-fit, minmax(140px,1fr))",
-                    gap:1, mb:1
-                  }}>
-                    <Box>
-                      <Typography variant="caption">Hostname</Typography>
-                      <Typography>{info.sv_hostname || "N/A"}</Typography>
-                    </Box>
-                    <Box>
-                      <Typography variant="caption">Map</Typography>
-                      <Typography>{info.mapname || "N/A"}</Typography>
-                    </Box>
-                    <Box>
-                      <Typography variant="caption">Game</Typography>
-                      <Typography>{info.gamename || "N/A"}</Typography>
-                    </Box>
-                    <Box>
-                      <Typography variant="caption">Players</Typography>
-                      <Typography>{players.length}</Typography>
-                    </Box>
-                  </Box>
-
-                  {players.length > 0 && (
-                    <Table size="small">
-                      <TableHead>
-                        <TableRow>
-                          <TableCell>#</TableCell>
-                          <TableCell>Name</TableCell>
-                          <TableCell>Score</TableCell>
-                          <TableCell>Ping</TableCell>
-                        </TableRow>
-                      </TableHead>
-                      <TableBody>
-                        {players.map((p,i) => (
-                          <TableRow key={i}>
-                            <TableCell>{i+1}</TableCell>
-                            <TableCell>{p.name}</TableCell>
-                            <TableCell>{p.score}</TableCell>
-                            <TableCell>{p.ping}</TableCell>
-                          </TableRow>
-                        ))}
-                      </TableBody>
-                    </Table>
-                  )}
-                </>
-                )}
-              </CardContent>
-            </Card>
-
-            <Card>
-              <CardHeader
-                title="LocalXpose Tunnel"
-                action={<StatusChip label="LocalXpose" online={lxOnline}/>}
-              />
-              <CardContent>
-                <Typography variant="caption">Public UDP URL</Typography>
-                <Typography sx={{wordBreak:"break-all", mb:1}}>
-                  {lxUrl}
-                </Typography>
-
-                <Stack direction="row" spacing={1}>
-                  <Button
-                    variant="contained"
-                    color="primary"
-                    size="small"
-                    onClick={copyLocalxpose}
-                    disabled={!lxOnline}
-                  >
-                    Copy LocalXpose Address
-                  </Button>
-                </Stack>
-
-                {lx.error && (
-                  <Typography variant="caption" color="warning.main">
-                    Error: {lx.error}
-                  </Typography>
-                )}
-              </CardContent>
-            </Card>
+            {panelOrder.map((id, idx) => renderPanel(id, idx))}
 
           </Stack>
         </Container>

@@ -56,6 +56,9 @@ def _run_loclx() -> None:
 
     env = os.environ.copy()
     env["LOCALXPOSE_ACCESS_TOKEN"] = token
+    # Newer LocalXpose builds expect ACCESS_TOKEN instead of LOCALXPOSE_ACCESS_TOKEN
+    # so populate both to keep backward compatibility.
+    env["ACCESS_TOKEN"] = token
 
     try:
         _proc = subprocess.Popen(
