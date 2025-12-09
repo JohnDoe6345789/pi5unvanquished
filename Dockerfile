@@ -79,8 +79,21 @@ if [ ! -f "${CFG_PATH}" ] && [ -f "${DEFAULT_CFG}" ]; then
   cp "${DEFAULT_CFG}" "${CFG_PATH}"
 fi
 
+NEEDS_MAP_FALLBACK=true
 if [ -f "${CFG_PATH}" ]; then
-  exec /opt/unvanquished/daemonded "$@" +exec "${UNV_SERVER_CFG}"
+  if grep -Eiq '^[[:space:]]*(map|nextmap)\b' "${CFG_PATH}" \
+     || grep -Eiq '^[[:space:]]*seta?[[:space:]]+g_initialMapRotation\b' "${CFG_PATH}"; then
+    NEEDS_MAP_FALLBACK=false
+  fi
+fi
+
+if [ -f "${CFG_PATH}" ]; then
+  if [ "${NEEDS_MAP_FALLBACK}" = "true" ]; then
+    echo "No map directive found in ${CFG_PATH}, adding fallback +map plat23"
+    exec /opt/unvanquished/daemonded "$@" +exec "${UNV_SERVER_CFG}" +map plat23
+  else
+    exec /opt/unvanquished/daemonded "$@" +exec "${UNV_SERVER_CFG}"
+  fi
 else
   echo "No ${CFG_PATH} found, starting with plat23. Create ${CFG_PATH} for custom config."
   exec /opt/unvanquished/daemonded "$@" +map plat23
