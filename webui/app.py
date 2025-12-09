@@ -138,7 +138,7 @@ def query_localxpose_status() -> Dict[str, Any]:
 # Embedded React + Material UI Page
 # ----------------------------------------------------
 
-HTML_TEMPLATE = """
+HTML_TEMPLATE = """{%- raw -%}
 <!doctype html>
 <html>
 <head>
@@ -371,6 +371,7 @@ root.render(<App />);
 
 </body>
 </html>
+{%- endraw -%}
 """
 
 # ----------------------------------------------------
