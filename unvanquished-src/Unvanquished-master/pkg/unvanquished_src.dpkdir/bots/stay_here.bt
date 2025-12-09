@@ -1,0 +1,37 @@
+selector
+{
+	behavior subroutine_unstick
+
+	condition team == TEAM_HUMANS
+	{
+		selector
+		{
+			behavior subroutine_use_medkit
+			behavior subroutine_fight_or_flight_humans
+			behavior subroutine_reload
+
+			sequence
+			{
+				condition ( distanceTo( E_H_ARMOURY ) < 500 )
+				action equip
+			}
+
+			action stayHere( 500 )
+			action roam
+		}
+
+	}
+
+	condition team == TEAM_ALIENS
+	{
+		selector
+		{
+			behavior subroutine_extinguish_fire
+			behavior subroutine_evolve
+			behavior subroutine_fight_or_flight_aliens
+
+			action stayHere( 500 )
+			action roam
+		}
+	}
+}

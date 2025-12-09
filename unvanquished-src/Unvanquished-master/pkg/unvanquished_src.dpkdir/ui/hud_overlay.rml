@@ -1,0 +1,41 @@
+<rml>
+<head>
+	<link type="text/rcss" href="/ui/shared/basics.rcss" />
+	<style>
+		body {
+			width: 100%;
+			height: 100%;
+			font-size: 18dp;
+			font-effect: outline( 2px #111 );
+		}
+		div {
+			position: absolute;
+			top: 20%;
+			width: 75%;
+			margin: auto auto;
+			text-align: center;
+		}
+		warmup_time {
+			font-size: 6em;
+		}
+
+		.bpVampire {
+			text-align: center;
+			position: absolute;
+			font-size: 18dp;
+			top: 4.3%;
+			margin: 0 auto 0 auto;
+		}
+	</style>
+</head>
+<body id="hud_overlay">
+<div class="bpVampire">
+	<bpVampire/>
+</div>
+<div>
+	<warmup_time/>
+	<br/>
+	<center_print/>
+</div>
+</body>
+</rml>

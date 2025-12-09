@@ -11,6 +11,7 @@ Run an Unvanquished dedicated server on a Raspberry Pi 5 (or other ARM64 host) w
 - `pkg/`: Upstream `.dpk` assets you can copy into your server home if you want to preload maps/content.
 - `daemon`, `daemonded`, `pkg/`, and `game/` are prebundled for ARM64; no download needed at build time.
 - `docs/daemon-engine.md`: Notes on the bundled Daemon binaries and how the entrypoint wires them up.
+- `docs/controls-and-mechanics.md`: Quick controls/mechanics cheatsheet plus an “all guns” auto-buy script.
 
 ## Requirements
 - Docker and Docker Compose v2 (images are ARM64; Docker Desktop/buildx can run them on AMD64 via binfmt, or build on an ARM64 host)
@@ -49,6 +50,10 @@ set sv_hostname "Pi-5 Unvanquished"
 seta rconPassword "changeme"
 map plat23
 ```
+
+## Controls + instant loadout
+- Binds and gameplay basics: `docs/controls-and-mechanics.md`.
+- Spawn with everything (no buy menu): cheats are already enabled in `game/server.cfg` (`sv_cheats 1`). In the client console run `\exec autogear.cfg`, then after spawning on humans stand by an armoury and press `F5` to auto-buy every weapon/suit/utility. Tap `F5` again after each respawn to re-equip.
 
 ## Web dashboard
 - Runs from `webui/app.py`, serving `/api/status` (game server query) and `/api/localxpose_status`.

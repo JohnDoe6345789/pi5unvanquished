@@ -1,0 +1,66 @@
+<rml>
+	<head>
+		<link type="text/rcss" href="/ui/shared/basics.rcss" />
+		<link type="text/template" href="/ui/shared/window.rml" />
+		<link type="text/rcss" href="menu.rcss" />
+		<script src="lua/util.lua"></script>
+	</head>
+
+	<body id="menu_ingame" class="ingame" onkeydown="detectEscape(event, document)" >
+		<img class="gradient black" src="/ui/assets/background/black" />
+		<img class="circles" src="/ui/assets/background/circles1" />
+		<img class="circles" src="/ui/assets/background/circles2" />
+		<img class="black2" src="/ui/assets/background/black2" />
+
+		<div class="devmsg"><translate>This is a beta version of Unvanquished. Please report any issue you may find at <web dest="bugs" /></translate></div>
+
+		<sidebar style="top: 10%;">
+			<!-- HACK: Using shared/window.rml as a stylesheet rather than a template -->
+			<window id="innersidebar" class="innersidebar" >
+
+				<sidesection  id="sidebar_ingame">
+					<h1><translate>Match</translate></h1>
+					<div style="display:flex;align-items: stretch;">
+						<!--Don't put  ' class="rightfloat ' on the first button because this is allready defined in the "button-menu"-->
+						<button-menu style="width:39%;" onclick='Cmd.exec("disconnect")'><translate>Leave match</translate></button-menu>
+						<button-menu class="leftalign" style="width:39%;" onclick='Events.pushcmd("blurall")'><translate>Resume action</translate></button-menu>
+					</div>
+					<indent>
+						<button-menu style="width:87%"  onclick='Events.pushcmd("exec team alien; hide ingame_menu")'><translate>Join Aliens</translate></button-menu>
+						<br/>
+						<button-menu style="width:87%"  onclick='Events.pushcmd("exec team human; hide ingame_menu")'><translate>Join Humans</translate></button-menu>
+						<br/>
+						<button-menu style="width:87%"  onclick='Events.pushcmd("exec team spec; hide ingame_menu")'><translate>Spectate</translate></button-menu>
+						<button-menu style="width:87%" onclick='Events.pushcmd("show options_democracy")'><translate>Democracy</translate></button-menu>
+					</indent>
+
+					<if cvar="sv_running" condition="==" value="1">
+						<h1><translate>Host menu</translate></h1>
+						<indent>
+                                                        <button-menu style="width:87%" onclick='Events.pushcmd("show server_setup")'><translate>Server setup</translate></button-menu>
+                                                        <br/>
+							<button-menu style="width:87%"  class="rightfloat" onclick='Cmd.exec("disconnect")'><translate>Stop server</translate></button-menu>
+							<br/>
+							<button-menu style="width:87%"  class="leftalign" onclick='Cmd.exec("pause")'><translate>Pause server</translate></button-menu>
+                                                        <br/>
+					                <button-menu style="width:87%" onclick='Events.pushcmd("show options_bots")'><translate>Bots</translate></button-menu>
+						</indent>
+					</if>
+
+					<h1><translate>Main menu</translate></h1>
+					<indent>
+						<button-menu style="width:87%" onclick='Events.pushcmd("show serverbrowser")'><translate>Server listings</translate></button-menu>
+						<button-menu style="width:87%" onclick='Events.pushcmd("show createserver")'><translate>Start local/LAN game</translate></button-menu>
+						<button-menu style="width:87%" onclick='Events.pushcmd("show options")'><translate>Options</translate></button-menu>
+						<button-menu style="width:87%" onclick='Events.pushcmd("show help_gameplay")'><translate>Gameplay guide</translate></button-menu>
+					</indent>
+					<br/>
+					<button-menu style="width:50%" class="rightfloat" onclick='Cmd.exec("quit")'><translate>Quit game</translate></button-menu>
+					<blocklink class="leftalign fake" style="color: #ffffff;">
+						<translate>Beta</translate>&nbsp;<version/>
+					</blocklink>
+				</sidesection>
+			</window>
+		</sidebar>
+	</body>
+</rml>

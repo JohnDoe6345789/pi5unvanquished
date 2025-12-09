@@ -1,0 +1,35 @@
+selector
+{
+	behavior subroutine_unstick
+
+	condition ( team == TEAM_ALIENS )
+	{
+		selector
+		{
+			behavior subroutine_extinguish_fire
+			behavior subroutine_evolve
+			behavior subroutine_fight_or_flight_aliens
+			action roamInRadius( E_A_OVERMIND, 500 )
+			action roamInRadius( E_A_SPAWN, 500 )
+			action roamInRadius( E_A_BOOSTER, 500 )
+			action roam
+		}
+	}
+
+	condition ( team == TEAM_HUMANS )
+	{
+		selector
+		{
+			behavior subroutine_use_medkit
+			behavior subroutine_fight_or_flight_humans
+			behavior subroutine_repair
+			behavior subroutine_reload
+			action equip
+			action roamInRadius( E_H_REACTOR, 500 )
+			action roamInRadius( E_H_SPAWN, 500 )
+			action roamInRadius( E_H_ARMOURY, 500 )
+			action roamInRadius( E_H_MEDISTAT, 500 )
+			action roam
+		}
+	}
+}

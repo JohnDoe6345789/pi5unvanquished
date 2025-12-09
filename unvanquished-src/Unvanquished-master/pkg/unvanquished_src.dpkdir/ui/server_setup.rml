@@ -1,0 +1,382 @@
+<rml>
+	<head>
+		<link type="text/rcss" href="/ui/shared/basics.rcss" />
+		<link type="text/rcss" href="/ui/shared/tooltip.rcss" />
+		<link type="text/template" href="/ui/shared/window.rml" />
+	</head>
+	<body id="server_setup" template="window" style="width: 46em; margin: 5% auto auto auto;">
+		<h1><translate>Server setup</translate></h1>
+
+		<tabset>
+
+		<!-- GENERAL SERVER CONFIG -->
+		<tab><translate>General</translate></tab><panel>
+			<row>
+				<parent>
+					<h3><translate>Free funds frequency</translate></h3>
+					<tooltip><translate>Every X seconds the player is alive, they will receive free funds.</translate></tooltip>
+				</parent>
+				<input type="range" min="0" max="3600" step="1" cvar="g_freeFundPeriod" />
+				<p><inlinecvar cvar="g_freeFundPeriod" type="number" format="%g"/>&nbsp;<translate>seconds</translate><ilink onclick='Cmd.exec("reset g_freeFundPeriod")'> (reset) </ilink></p>
+			</row>
+			<row>
+				<parent>
+					<h3><translate>Friendly fire damage multipliers</translate></h3>
+					<tooltip><translate>Damage multiplier for team damage (doesn't include buildings, or self)</translate></tooltip>
+				</parent>
+				<input type="range" min="0" max="1" step="0.05" cvar="g_friendlyFireAlienMultiplier" />
+				<p><translate>Alien:</translate>&nbsp;<inlinecvar cvar="g_friendlyFireAlienMultiplier" type="number" format="%.2f"/><ilink onclick='Cmd.exec("reset g_friendlyFireAlienMultiplier")'> (reset) </ilink></p>
+				<input type="range" min="0" max="1" step="0.05" cvar="g_friendlyFireHumanMultiplier" />
+				<p><translate>Human:</translate>&nbsp;<inlinecvar cvar="g_friendlyFireHumanMultiplier" type="number" format="%.2f"/><ilink onclick='Cmd.exec("reset g_friendlyFireHumanMultiplier")'> (reset) </ilink></p>
+			</row>
+			<row>
+				<input cvar="g_friendlyBuildableFire" type="checkbox" />
+				<parent>
+					<h3><translate>Friendly buildable fire</translate></h3>
+					<tooltip>Can one hurt the team's buildable?</tooltip>
+				</parent>
+			</row>
+			<row>
+				<input cvar="g_allowVote" type="checkbox" />
+				<h3><translate>Allow voting</translate></h3>
+			</row>
+
+			<h2><translate>Warmup</translate></h2>
+			<row>
+				<input cvar="g_doWarmup" type="checkbox" />
+				<parent>
+					<h3><translate>Do warmups at every game start</translate></h3>
+					<tooltip><translate>Gives players on slower computers time to join.</translate></tooltip>
+				</parent>
+				<if cvar="g_doWarmup" condition="==" value="1">
+					<input type="range" min="0" max="30" step="1" cvar="g_warmup" />
+					<p><inlinecvar cvar="g_warmup" type="number" format="%g"/>&nbsp;<translate>seconds</translate><ilink onclick='Cmd.exec("reset g_warmup")'> (reset) </ilink></p>
+				</if>
+			</row>
+
+			<h2><translate>Teams</translate></h2>
+			<row>
+				<input cvar="g_alienAllowBuilding" type="checkbox" />
+				<h3><translate>Allow alien building</translate></h3>
+			</row>
+			<row>
+				<input cvar="g_humanAllowBuilding" type="checkbox" />
+				<h3><translate>Allow human building</translate></h3>
+			</row>
+
+			<h2><translate>Physics</translate></h2>
+			<row>
+				<input type="range" min="100" max="2000" step="10" cvar="g_gravity"/>
+				<h3><translate>Gravity</translate></h3>
+				<p class="inline">
+					<translate>Current:</translate>&nbsp;<inlinecvar cvar="g_gravity" type="number" format="%.0f"/>
+					&nbsp;<ilink onclick='Cmd.exec("reset g_gravity")'>(<translate>reset</translate>)</ilink>
+				</p>
+			</row>
+			<row>
+				<input cvar="g_dretchpunt" type="checkbox" />
+				<parent>
+					<h3><translate>Dretch punt</translate></h3>
+					<tooltip><translate>Dretches can be pushed out of the way by attacking them.</translate></tooltip>
+				</parent>
+			</row>
+			<row>
+				<input cvar="g_antiSpawnBlock" type="checkbox" />
+				<parent>
+					<h3><translate>Anti spawn-block</translate></h3>
+					<tooltip><translate>Push slow people away from spawns.</translate></tooltip>
+				</parent>
+			</row>
+		</panel>
+
+		<!-- MOMENTUM CONFIG -->
+		<tab><translate>Momentum</translate></tab><panel>
+			<row>
+				<parent>
+					<h3><translate>Half life time</translate></h3>
+					<tooltip><translate>Time for momentum to decrease 50%. 0 disables this behavior.</translate></tooltip>
+				</parent>
+				<input type="range" min="0" max="60" step="1" cvar="g_momentumHalfLife"/>
+				<p><inlinecvar cvar="g_momentumHalfLife" type="number" format="%g"/>&nbsp;<translate>minutes</translate><ilink onclick='Cmd.exec("reset g_momentumHalfLife")'> (reset) </ilink></p>
+			</row>
+			<row>
+				<parent>
+					<h3><translate>Double reward delay</translate></h3>
+					<tooltip><translate>Time after which some momentum rewards double</translate></tooltip>
+				</parent>
+				<input type="range" min="0" max="240" step="5" cvar="g_momentumRewardDoubleTime"/>
+				<p><inlinecvar cvar="g_momentumRewardDoubleTime" type="number" format="%g"/>&nbsp;<translate>minutes</translate><ilink onclick='Cmd.exec("reset g_momentumRewardDoubleTime")'> (reset) </ilink></p>
+			</row>
+			<row>
+				<parent>
+					<h3><translate>Base Multiplier</translate></h3>
+					<tooltip><translate>Generic momentum reward multiplier</translate></tooltip>
+				</parent>
+				<input type="range" min="0" max="5" step="0.1" cvar="g_momentumBaseMod"/>
+				<p><inlinecvar cvar="g_momentumBaseMod" type="number" format="%g"/>&nbsp;<ilink onclick='Cmd.exec("reset g_momentumBaseMod")'> (reset) </ilink></p>
+			</row>
+			<row>
+				<parent>
+					<h3><translate>Kills reward multiplier</translate></h3>
+					<tooltip><translate>Momentum reward multiplier for kills</translate></tooltip>
+				</parent>
+				<input type="range" min="0" max="5" step="0.1" cvar="g_momentumKillMod"/>
+				<p><inlinecvar cvar="g_momentumKillMod" type="number" format="%g"/>&nbsp;<ilink onclick='Cmd.exec("reset g_momentumKillMod")'> (reset) </ilink></p>
+			</row>
+			<row>
+				<parent>
+					<h3><translate>Building reward multiplier</translate></h3>
+					<tooltip><translate>Momentum reward multiplier for construction</translate></tooltip>
+				</parent>
+				<input type="range" min="0" max="5" step="0.1" cvar="g_momentumBuildMod"/>
+				<p><inlinecvar cvar="g_momentumBuildMod" type="number" format="%g"/>&nbsp;<ilink onclick='Cmd.exec("reset g_momentumBuildMod")'> (reset) </ilink></p>
+			</row>
+			<row>
+				<parent>
+					<h3><translate>Deconstruction penalty multiplier</translate></h3>
+					<tooltip><translate>Momentum penalty multiplier for deconstruction</translate></tooltip>
+				</parent>
+				<input type="range" min="0" max="5" step="0.1" cvar="g_momentumDeconMod"/>
+				<p><inlinecvar cvar="g_momentumDeconMod" type="number" format="%g"/>&nbsp;<ilink onclick='Cmd.exec("reset g_momentumDeconMod")'> (reset) </ilink></p>
+			</row>
+			<row>
+				<parent>
+					<h3><translate>Building kill reward multiplier</translate></h3>
+					<tooltip><translate>Momentum reward multiplier for killing buildables</translate></tooltip>
+				</parent>
+				<input type="range" min="0" max="5" step="0.1" cvar="g_momentumDestroyMod"/>
+				<p><inlinecvar cvar="g_momentumDestroyMod" type="number" format="%g"/>&nbsp;<ilink onclick='Cmd.exec("reset g_momentumDestroyMod")'> (reset) </ilink></p>
+			</row>
+		</panel>
+
+		<!-- BUILDPOINTS CONFIG -->
+		<tab><translate>Build system</translate></tab><panel>
+			<row>
+				<parent>
+					<h3><translate>Starting value</translate></h3>
+					<tooltip><translate>Initial build points count</translate></tooltip>
+				</parent>
+				<input type="range" min="0" max="400" step="10" cvar="g_BPInitialBudget"/>
+				<p><inlinecvar cvar="g_BPInitialBudget" type="number" format="%g"/>&nbsp; bp<ilink onclick='Cmd.exec("reset g_BPInitialBudget")'> (reset) </ilink></p>
+			</row>
+			<row>
+				<parent>
+					<h3><translate>Miner bonus</translate></h3>
+					<tooltip><translate>Build point budget per miner</translate></tooltip>
+				</parent>
+				<input type="range" min="0" max="400" step="10" cvar="g_BPBudgetPerMiner"/>
+				<p><inlinecvar cvar="g_BPBudgetPerMiner" type="number" format="%g"/>&nbsp; bp<ilink onclick='Cmd.exec("reset g_BPBudgetPerMiner")'> (reset) </ilink></p>
+			</row>
+			<row>
+				<parent>
+					<h3><translate>Initial regeneration speed</translate></h3>
+					<tooltip><translate>The initial speed at which BP will be recovered (in BP per minute)</translate></tooltip>
+				</parent>
+				<input type="range" min="0" max="50" step="4" cvar="g_BPRecoveryInitialRate"/>
+				<p><inlinecvar cvar="g_BPRecoveryInitialRate" type="number" format="%g"/>&nbsp; bp/min<ilink onclick='Cmd.exec("reset g_BPRecoveryInitialRate")'> (reset) </ilink></p>
+			</row>
+			<row>
+				<parent>
+					<h3><translate>Half regeneration time</translate></h3>
+					<tooltip><translate>The duration one will wait before BP recovery gets twice as slow</translate></tooltip>
+				</parent>
+				<input type="range" min="0" max="60" step="2" cvar="g_BPRecoveryRateHalfLife"/>
+				<p><inlinecvar cvar="g_BPRecoveryRateHalfLife" type="number" format="%g"/>&nbsp; <translate>minutes</translate><ilink onclick='Cmd.exec("reset g_BPRecoveryRateHalfLife")'> (reset) </ilink></p>
+			</row>
+		</panel>
+
+		<!-- GENERAL BOT CONFIG -->
+		<tab><translate>Bots: General</translate></tab><panel>
+			<row>
+				<parent>
+					<h3><translate>Minimum bots per team</translate></h3>
+					<tooltip><translate>Fill teams until they have enough players</translate></tooltip>
+				</parent>
+				<input type="range" min="0" max="9" step="1" cvar="g_bot_defaultFill"/>
+				<p><inlinecvar cvar="g_bot_defaultFill" type="number" format="%g"/>&nbsp; <translate>bots</translate><ilink onclick='Cmd.exec("reset g_bot_defaultFill")'> (reset) </ilink></p>
+			</row>
+			<row>
+				<parent>
+					<h3><translate>Default skill level</translate></h3>
+					<tooltip><translate>Only works for new bots.</translate></tooltip>
+				</parent>
+				<input type="range" min="1" max="9" step="1" cvar="g_bot_defaultSkill"/>
+				<p><inlinecvar cvar="g_bot_defaultSkill" type="number" format="%g"/>&nbsp;<ilink onclick='Cmd.exec("reset g_bot_defaultSkill")'> (reset) </ilink></p>
+			</row>
+			<h2><translate>Humanity</translate></h2>
+			<row>
+				<input type="range" min="45" max="360" step="1" cvar="g_bot_fov"/>
+				<h3><translate>Field of view</translate></h3>
+				<p class="inline">
+					Current: <inlinecvar cvar="g_bot_fov" type="number" format="%.0f"/> degrees
+					<ilink onclick='Cmd.exec("reset g_bot_fov")'> (reset) </ilink>
+				</p>
+			</row>
+			<row>
+				<input type="range" min="0" max="2000" step="10" cvar="g_bot_reactiontime"/>
+				<h3><translate>Reaction time</translate></h3>
+				<p class="inline">
+					Current: <inlinecvar cvar="g_bot_reactiontime" type="number" format="%.0f"/> msecs
+					<ilink onclick='Cmd.exec("reset g_bot_reactiontime")'> (reset) </ilink>
+				</p>
+			</row>
+
+			<h2><translate>Behaviour</translate></h2>
+			<row>
+				<input cvar="g_bot_attackStruct" type="checkbox" />
+				<h3><translate>Attack structures</translate></h3>
+			</row>
+			<h2><translate>Cheating</translate></h2>
+			<row>
+				<input cvar="g_bot_infiniteFunds" type="checkbox" />
+				<h3><translate>Infinite funds</translate></h3>
+			</row>
+			<row>
+				<input cvar="g_bot_infiniteMomentum" type="checkbox" />
+				<h3><translate>Ignore momentum</translate></h3>
+			</row>
+			<h2><translate>Navmesh generation</translate></h2>
+			<row>
+				<input cvar="cg_navgenOnLoad" type="checkbox" />
+				<h3><translate>Generate navmeshes at load time</translate></h3>
+			</row>
+			<row>
+				<input type="range" min="1" max="16" step="1" cvar="cg_navgenMaxThreads"/>
+				<h3><translate>Number of worker threads</translate></h3>
+				<p class="inline">
+					Current: <inlinecvar cvar="cg_navgenMaxThreads" type="number" format="%.0f"/>
+				</p>
+			</row>
+		</panel>
+
+		<!-- HUMANS BOT CONFIG -->
+		<tab><translate>Bots: Humans</translate></tab><panel>
+			<h2><translate>Overall</translate></h2>
+			<row>
+				<input cvar="g_bot_buy" type="checkbox" />
+				<h3><translate>Human bots purchase equipment</translate></h3>
+			</row>
+			<row>
+				<input type="range" min="0" max="2000" step="10" cvar="g_bot_humanAimDelay"/>
+				<h3><translate>Aim speed modifier (higher is slower)</translate></h3>
+				<p class="inline">
+					Current: <inlinecvar cvar="g_bot_humanAimDelay" type="number" format="%.0f"/> msecs
+					<ilink onclick='Cmd.exec("reset g_bot_humanAimDelay")'> (reset) </ilink>
+				</p>
+			</row>
+			<h2><translate>Individually</translate></h2>
+			<h3><translate>Primary Weapons</translate></h3>
+			<row>
+				<input cvar="g_bot_ckit" type="checkbox" />
+				<h3><translate>Construction Kit (repairs)</translate></h3>
+			</row>
+			<row>
+				<input cvar="g_bot_rifle" type="checkbox" />
+				<h3><translate>SMG</translate></h3>
+			</row>
+			<row>
+				<input cvar="g_bot_painsaw" type="checkbox" />
+				<h3><translate>Painsaw</translate></h3>
+			</row>
+			<row>
+				<input cvar="g_bot_shotgun" type="checkbox" />
+				<h3><translate>Shotgun</translate></h3>
+			</row>
+			<row>
+				<input cvar="g_bot_lasgun" type="checkbox" />
+				<h3><translate>Lasgun</translate></h3>
+			</row>
+			<row>
+				<input cvar="g_bot_mdriver" type="checkbox" />
+				<h3><translate>Mass Driver</translate></h3>
+			</row>
+			<row>
+				<input cvar="g_bot_chain" type="checkbox" />
+				<h3><translate>Chaingun</translate></h3>
+			</row>
+			<row>
+				<input cvar="g_bot_flamer" type="checkbox" />
+				<h3><translate>Flamethrower</translate></h3>
+			</row>
+			<row>
+				<input cvar="g_bot_prifle" type="checkbox" />
+				<h3><translate>Pulse Rifle</translate></h3>
+			</row>
+			<row>
+				<input cvar="g_bot_lcannon" type="checkbox" />
+				<h3><translate>Lucifer Cannon</translate></h3>
+			</row>
+			<h3><translate>Armors</translate></h3>
+			<row>
+				<input cvar="g_bot_lightarmour" type="checkbox" />
+				<h3><translate>whether bots buy Light Armour</translate></h3>
+			</row>
+			<row>
+				<input cvar="g_bot_mediumarmour" type="checkbox" />
+				<h3><translate>whether bots buy Medium Armour</translate></h3>
+			</row>
+			<row>
+				<input cvar="g_bot_battlesuit" type="checkbox" />
+				<h3><translate>whether bots buy the Battlesuit</translate></h3>
+			</row>
+			<h3><translate>Misc</translate></h3>
+			<row>
+				<input cvar="g_bot_firebomb" type="checkbox" />
+				<h3><translate>Firebomb</translate></h3>
+			</row>
+			<row>
+				<input cvar="g_bot_grenade" type="checkbox" />
+				<h3><translate>Grenade</translate></h3>
+			</row>
+			<row>
+				<input cvar="g_bot_radar" type="checkbox" />
+				<h3><translate>Radar</translate></h3>
+			</row>
+		</panel>
+
+		<!-- ALIENS BOT CONFIG -->
+		<tab>Bots: Aliens </tab> <panel>
+			<h2><translate>Overall</translate></h2>
+			<row>
+				<input cvar="g_bot_evolve" type="checkbox" />
+				<h3><translate>Alien bots morph</translate></h3>
+			</row>
+			<row>
+				<input type="range" min="0" max="2000" step="10" cvar="g_bot_alienAimDelay"/>
+				<h3><translate>Aim speed modifier (higher is slower)</translate></h3>
+				<p class="inline">
+					Current: <inlinecvar cvar="g_bot_alienAimDelay" type="number" format="%.0f"/> msecs
+					<ilink onclick='Cmd.exec("reset g_bot_alienAimDelay")'> (reset) </ilink>
+				</p>
+			</row>
+
+			<h2><translate>Individually</translate></h2>
+			<row>
+				<input cvar="g_bot_level1" type="checkbox" />
+				<h3><translate>Mantis</translate></h3>
+			</row>
+			<row>
+				<input cvar="g_bot_level2" type="checkbox" />
+				<h3><translate>Marauder</translate></h3>
+			</row>
+			<row>
+				<input cvar="g_bot_level2upg" type="checkbox" />
+				<h3><translate>Advanced Marauder</translate></h3>
+			</row>
+			<row>
+				<input cvar="g_bot_level3" type="checkbox" />
+				<h3><translate>Dragoon</translate></h3>
+			</row>
+			<row>
+				<input cvar="g_bot_level3upg" type="checkbox" />
+				<h3><translate>Advanced Dragoon</translate></h3>
+			</row>
+			<row>
+				<input cvar="g_bot_level4" type="checkbox" />
+				<h3><translate>Tyrant</translate></h3>
+			</row>
+		</panel>
+
+		</tabset>
+	</body>
+</rml>

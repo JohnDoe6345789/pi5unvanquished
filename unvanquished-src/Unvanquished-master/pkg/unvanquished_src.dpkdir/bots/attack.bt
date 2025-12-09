@@ -1,0 +1,97 @@
+selectClass
+{
+	selector
+	{
+		condition team == TEAM_ALIENS
+		{
+			spawnAs PCL_ALIEN_LEVEL0
+		}
+		condition team == TEAM_HUMANS
+		{
+			spawnAs WP_MACHINEGUN
+		}
+	}
+}
+
+selector
+{
+	// reset the suicide timer
+	decorator return( STATUS_FAILURE )
+	{
+		action resetMyTimer
+	}
+
+	behavior subroutine_unstick
+
+	condition team == TEAM_HUMANS
+	{
+		selector
+		{
+			behavior subroutine_use_medkit
+
+			sequence
+			{
+				condition alertedToEnemy
+				condition percentAmmoClip > 0 || percentClips > 0
+				{
+					selector
+					{
+						behavior subroutine_throw_grenade
+						action fight
+					}
+				}
+			}
+
+			behavior subroutine_reload
+			sequence
+			{
+				// the bot is required to attack, only visit an armoury
+				// if one is near
+				condition ( distanceTo( E_H_ARMOURY ) < 500 )
+				action equip
+			}
+
+			selector
+			{
+				condition percentAmmoClip == 0 && percentClips == 0
+				{
+					// refill at a suitable building
+					// TODO: reload energy weapons at reactor etc
+					action moveTo( E_H_ARMOURY )
+				}
+			}
+
+			sequence
+			{
+				// the bot cannot refill or equip, it must fight with the blaster
+				condition alertedToEnemy
+				action fight
+			}
+
+			action rush
+			action roamInRadius( E_A_OVERMIND, 500 )
+			action roamInRadius( E_A_SPAWN, 500 )
+			action roam
+		}
+
+	}
+
+	condition team == TEAM_ALIENS
+	{
+		selector
+		{
+			behavior subroutine_evolve
+
+			sequence
+			{
+				condition alertedToEnemy
+				action fight
+			}
+
+			action rush
+			action roamInRadius( E_H_REACTOR, 500 )
+			action roamInRadius( E_H_SPAWN, 500 )
+			action roam
+		}
+	}
+}
