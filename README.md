@@ -12,7 +12,7 @@ Run an Unvanquished dedicated server on a Raspberry Pi 5 (or other ARM64 host) w
 - `daemon`, `daemonded`, `pkg/`, and `game/` are prebundled for ARM64; no download needed at build time.
 
 ## Requirements
-- Docker and Docker Compose v2 (build on an ARM64 host; binaries are prebundled for ARM64)
+- Docker and Docker Compose v2 (images are ARM64; Docker Desktop/buildx can run them on AMD64 via binfmt, or build on an ARM64 host)
 - LocalXpose account + access token (for the UDP tunnel)
 - Node 18+ only if you plan to use the CapRover bootstrap script
 

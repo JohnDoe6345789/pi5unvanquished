@@ -1,5 +1,6 @@
 # Dockerfile
-FROM debian:bookworm-slim
+ARG TARGETPLATFORM=linux/arm64
+FROM --platform=${TARGETPLATFORM} debian:bookworm-slim
 
 # Version from upstream universal zip; adjust when they bump.
 ARG UNV_VERSION=0.55.5
