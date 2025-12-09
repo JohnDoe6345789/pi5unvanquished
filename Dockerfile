@@ -14,7 +14,8 @@ ENV DEBIAN_FRONTEND=noninteractive \
     UNV_PORT6=27960 \
     UNV_SERVER_CFG=server.cfg
 
-RUN apt-get update && apt-get install -y --no-install-recommends \
+RUN dpkg --add-architecture armhf \
+    && apt-get update && apt-get install -y --no-install-recommends \
       ca-certificates \
       libstdc++6 \
       libgcc-s1 \
@@ -24,7 +25,19 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
       libogg0 \
       libvorbis0a \
       libvorbisfile3 \
+      libc6:armhf \
+      libstdc++6:armhf \
+      libgcc-s1:armhf \
+      zlib1g:armhf \
+      libcurl4:armhf \
+      libopenal1:armhf \
+      libogg0:armhf \
+      libvorbis0a:armhf \
+      libvorbisfile3:armhf \
     && rm -rf /var/lib/apt/lists/*
+
+RUN mkdir -p /opt/unvanquished/lib-armhf \
+    && ln -sf /lib/ld-linux-armhf.so.3 /opt/unvanquished/lib-armhf/ld-linux-armhf
 
 RUN useradd -m -d /home/unv -s /bin/bash unv \
     && mkdir -p /opt/unvanquished "${UNV_HOME}" \
