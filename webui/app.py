@@ -1,6 +1,6 @@
 import os
 import socket
-from typing import Any, Dict
+from typing import Any, Dict, List
 import requests
 from flask import Flask, jsonify, render_template_string
 
@@ -10,9 +10,9 @@ UNV_SERVER_HOST = os.environ.get("UNV_SERVER_HOST", "unvanq-server")
 UNV_SERVER_PORT = int(os.environ.get("UNV_SERVER_PORT", "27960"))
 STATUS_QUERY = b"\xff\xff\xff\xffgetstatus\n"
 
-NGROK_API_URL = os.environ.get(
-    "NGROK_API_URL",
-    "http://unvanq-ngrok:4040/api/tunnels",
+LOCALXPOSE_STATUS_URL = os.environ.get(
+    "LOCALXPOSE_STATUS_URL",
+    "http://unvanq-localxpose:4040/status",
 )
 
 # ----------------------------------------------------
@@ -107,31 +107,29 @@ def parse_player_line(line: str):
 
 
 # ----------------------------------------------------
-# Ngrok Tunnel Query
+# LocalXpose Tunnel Query
 # ----------------------------------------------------
-def query_ngrok_status() -> Dict[str, Any]:
+def query_localxpose_status() -> Dict[str, Any]:
     result = {
         "online": False,
         "public_url": None,
-        "tunnels": [],
         "error": "",
+        "log_tail": [],
     }
 
     try:
-        r = requests.get(NGROK_API_URL, timeout=1.0)
+        r = requests.get(LOCALXPOSE_STATUS_URL, timeout=1.0)
         r.raise_for_status()
         data = r.json()
     except Exception as exc:
         result["error"] = str(exc)
         return result
 
-    tunnels = data.get("tunnels", [])
-    result["tunnels"] = tunnels
-
-    for t in tunnels:
-        if t.get("proto") == "udp" and t.get("public_url", "").startswith("udp://"):
-            result["online"] = True
-            result["public_url"] = t["public_url"]
+    result["log_tail"] = data.get("log_tail", [])
+    result["public_url"] = data.get("public_url")
+    result["online"] = bool(data.get("online") and result["public_url"])
+    if not result["error"]:
+        result["error"] = data.get("error", "") or ""
 
     return result
 
@@ -168,7 +166,7 @@ HTML_TEMPLATE = """
 
 <script>
 window.API_STATUS_URL = "/api/status";
-window.API_NGROK_URL = "/api/ngrok_status";
+window.API_LOCALXPOSE_URL = "/api/localxpose_status";
 </script>
 
 </head>
@@ -185,7 +183,7 @@ const {
 
 function useServerData() {
   const [status, setStatus] = React.useState({loading:true, error:"", data:null});
-  const [ngrok, setNgrok] = React.useState({loading:true, error:"", data:null});
+  const [lx, setLx] = React.useState({loading:true, error:"", data:null});
 
   React.useEffect(() => {
     let dead = false;
@@ -200,11 +198,11 @@ function useServerData() {
       }
 
       try {
-        const r = await fetch(window.API_NGROK_URL);
+        const r = await fetch(window.API_LOCALXPOSE_URL);
         const j = await r.json();
-        if (!dead) setNgrok({loading:false,error:"",data:j});
+        if (!dead) setLx({loading:false,error:"",data:j});
       } catch(e) {
-        if (!dead) setNgrok(p => ({loading:false,error:String(e),data:p.data}));
+        if (!dead) setLx(p => ({loading:false,error:String(e),data:p.data}));
       }
     }
 
@@ -213,7 +211,7 @@ function useServerData() {
     return () => { dead = true; clearInterval(id); };
   }, []);
 
-  return {status, ngrok};
+  return {status, lx};
 }
 
 function StatusChip({label, online}) {
@@ -228,15 +226,15 @@ function StatusChip({label, online}) {
 }
 
 function App() {
-  const {status, ngrok} = useServerData();
+  const {status, lx} = useServerData();
 
   const serverOnline = !!(status.data && status.data.online);
   const info = (status.data && status.data.info) || {};
   const players = (status.data && status.data.players) || [];
 
-  const ngrokData = ngrok.data || {};
-  const ngrokOnline = !!ngrokData.online;
-  const ngrokUrl = ngrokData.public_url || "N/A";
+  const lxData = lx.data || {};
+  const lxOnline = !!lxData.online;
+  const lxUrl = lxData.public_url || "N/A";
 
   const theme = createTheme({
     palette: {
@@ -245,9 +243,9 @@ function App() {
     }
   });
 
-  const copyNgrok = () => {
-    if (ngrokOnline && ngrokUrl !== "N/A")
-      navigator.clipboard.writeText(ngrokUrl);
+  const copyLocalxpose = () => {
+    if (lxOnline && lxUrl !== "N/A")
+      navigator.clipboard.writeText(lxUrl);
   };
 
   return (
@@ -331,13 +329,13 @@ function App() {
 
             <Card>
               <CardHeader
-                title="Ngrok Tunnel"
-                action={<StatusChip label="Ngrok" online={ngrokOnline}/>}
+                title="LocalXpose Tunnel"
+                action={<StatusChip label="LocalXpose" online={lxOnline}/>}
               />
               <CardContent>
                 <Typography variant="caption">Public UDP URL</Typography>
                 <Typography sx={{wordBreak:"break-all", mb:1}}>
-                  {ngrokUrl}
+                  {lxUrl}
                 </Typography>
 
                 <Stack direction="row" spacing={1}>
@@ -345,16 +343,16 @@ function App() {
                     variant="contained"
                     color="primary"
                     size="small"
-                    onClick={copyNgrok}
-                    disabled={!ngrokOnline}
+                    onClick={copyLocalxpose}
+                    disabled={!lxOnline}
                   >
-                    Copy Ngrok Address
+                    Copy LocalXpose Address
                   </Button>
                 </Stack>
 
-                {ngrok.error && (
+                {lx.error && (
                   <Typography variant="caption" color="warning.main">
-                    Error: {ngrok.error}
+                    Error: {lx.error}
                   </Typography>
                 )}
               </CardContent>
@@ -387,9 +385,9 @@ def index():
 def api_status():
     return jsonify(query_unvanquished_server())
 
-@app.route("/api/ngrok_status")
-def api_ngrok():
-    return jsonify(query_ngrok_status())
+@app.route("/api/localxpose_status")
+def api_localxpose():
+    return jsonify(query_localxpose_status())
 
 
 if __name__ == "__main__":

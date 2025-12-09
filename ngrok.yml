@@ -1,6 +1,0 @@
-# ngrok agent config for the Unvanquished UDP tunnel.
-version: "3"
-tunnels:
-  unv:
-    addr: unvanq-server:27960
-    proto: udp

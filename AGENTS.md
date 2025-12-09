@@ -10,7 +10,7 @@ THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR I
 
 ## Agent scope
 - Honor the intended sources of truth: `compose.yml`, `Dockerfile`/`entrypoint.sh`, `webui/app.py`, and `deploy/src/bootstrap.ts`.
-- Avoid committing secrets (ngrok tokens, CapRover passwords, etc.); keep them in env vars.
+- Avoid committing secrets (LocalXpose tokens, CapRover passwords, etc.); keep them in env vars.
 - Prefer read-only operations unless explicitly asked to change the stack; test changes locally before publishing.
 - You may keep this file as `AGENT.md` or `AGENTS.md` to satisfy tools that look for either name.
 
