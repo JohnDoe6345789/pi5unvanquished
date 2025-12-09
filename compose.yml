@@ -8,15 +8,32 @@ services:
         UNV_ARCH: "linux-arm64"
     container_name: unvanq-server
     restart: unless-stopped
-
     environment:
       UNV_HOME: /var/unvanquished-home
       UNV_PORT: 27960
       UNV_PORT6: 27960
       UNV_SERVER_CFG: server.cfg
-
-    ports:
-      - "27960:27960/udp"
-
     volumes:
       - ./unvanquished-home:/var/unvanquished-home
+    expose:
+      - "27960/udp"
+
+  ngrok:
+    image: ngrok/ngrok:latest
+    container_name: unvanq-ngrok
+    restart: unless-stopped
+
+    # Replace with your ngrok token
+    environment:
+      NGROK_AUTHTOKEN: "${NGROK_AUTHTOKEN}"
+
+    # Ngrok config injected directly (no config file needed)
+    command:
+      - "tunnel"
+      - "unv"
+      - "--proto=udp"
+      - "--addr=unvanq-server:27960"
+
+    # Optional: view ngrok web UI on http://localhost:4040
+    #ports:
+    #  - "4040:4040"
