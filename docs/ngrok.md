@@ -2,6 +2,18 @@
 <!-- Offline copy of selected ngrok docs from ngrok/ngrok-docs. -->
 _Fetched from https://github.com/ngrok/ngrok-docs on 2025-12-09._
 
+## Project usage note
+- This stack uses `ngrok.yml` plus `ngrok start --config /etc/ngrok.yml unv` to expose the UDP game server. Update that file if you change the server port.
+- If you see `unknown flag: --proto`, it is from the old `ngrok tunnel --proto` syntax; the v3 agent requires a config-driven `ngrok start` instead.
+- The bundled config (`ngrok.yml`) looks like:
+```yaml
+version: "3"
+tunnels:
+  unv:
+    addr: unvanq-server:27960
+    proto: udp
+```
+
 ## What is ngrok?
 Source: https://github.com/ngrok/ngrok-docs/blob/main/what-is-ngrok.mdx
 

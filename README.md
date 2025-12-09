@@ -28,6 +28,20 @@ NGROK_AUTHTOKEN=xxxx docker compose up --build -d
 ```
 4) Open the dashboard at `http://localhost:8080` and copy the public UDP address to join your server.
 
+### Ngrok config
+- The ngrok sidecar now runs from an agent config file at `ngrok.yml` and starts via `ngrok start --config /etc/ngrok.yml unv`.
+- The default config sets a UDP tunnel to `unvanq-server:27960`. Edit `ngrok.yml` if you change the game server port or want extra tunnels/logging.
+- Example `ngrok.yml` shipped in the repo:
+```
+version: "3"
+tunnels:
+  unv:
+    addr: unvanq-server:27960
+    proto: udp
+```
+- The authtoken is still provided via `NGROK_AUTHTOKEN` env; you can also place it under `agent.authtoken` in the config if you prefer.
+- Seeing `unknown flag: --proto`? That means an older CLI invocation; use the bundled config (or run `ngrok start` with a v3-style config) instead.
+
 ## Configuring the game server
 - `UNV_HOME` (default `/var/unvanquished-home`): persisted volume for configs, logs, and extra pk3/dpk content. Mapped from `./unvanquished-home` by compose.
 - `UNV_PORT` / `UNV_PORT6`: UDP ports the server binds inside the container (default 27960).

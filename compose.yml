@@ -26,15 +26,16 @@ services:
       # Set this in your shell or .env: NGROK_AUTHTOKEN=xxxx
       NGROK_AUTHTOKEN: "${NGROK_AUTHTOKEN}"
     command:
-      - "tunnel"
+      - "start"
+      - "--config=/etc/ngrok.yml"
       - "unv"
-      - "--proto=udp"
-      - "--addr=unvanq-server:27960"
       # If you also want a web UI on host, uncomment:
       # - "--log=stdout"
     expose:
       # Ngrok's local API for the dashboard container to query
       - "4040/tcp"
+    volumes:
+      - ./ngrok.yml:/etc/ngrok.yml:ro
     # If you want to view ngrok dashboard from host, uncomment:
     #ports:
     #  - "4040:4040"
