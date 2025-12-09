@@ -10,6 +10,7 @@ RUN pip install --no-cache-dir flask requests
 
 COPY app.py /app/app.py
 COPY templates /app/templates
+COPY static /app/static
 
 EXPOSE 8080
 
