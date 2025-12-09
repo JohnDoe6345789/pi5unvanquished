@@ -9,6 +9,7 @@ WORKDIR /app
 RUN pip install --no-cache-dir flask requests
 
 COPY app.py /app/app.py
+COPY templates /app/templates
 
 EXPOSE 8080
 
