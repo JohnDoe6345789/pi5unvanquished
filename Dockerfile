@@ -15,8 +15,6 @@ ENV DEBIAN_FRONTEND=noninteractive \
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
       ca-certificates \
-      curl \
-      unzip \
       libstdc++6 \
       libgcc-s1 \
       zlib1g \
@@ -33,15 +31,10 @@ RUN useradd -m -d /home/unv -s /bin/bash unv \
 
 WORKDIR /opt/unvanquished
 
-# Universal zip contains linux-arm64.zip for ARM64.
-RUN curl -L -o "unvanquished_${UNV_VERSION}.zip" \
-      "https://downloads.sourceforge.net/project/unvanquished/v${UNV_VERSION}/unvanquished_${UNV_VERSION}.zip" \
-    && unzip "unvanquished_${UNV_VERSION}.zip" \
-    && cd "unvanquished_${UNV_VERSION}" \
-    && unzip "${UNV_ARCH}.zip" \
-    && mv pkg daemonded .. \
-    && cd .. \
-    && rm -rf "unvanquished_${UNV_VERSION}" "unvanquished_${UNV_VERSION}.zip"
+COPY daemon daemon-tty daemonded crash_server irt_core-armhf.nexe nacl_helper_bootstrap nacl_helper_bootstrap-armhf nacl_loader /opt/unvanquished/
+COPY pkg /opt/unvanquished/pkg
+COPY game /opt/unvanquished/game
+RUN chown -R unv:unv /opt/unvanquished
 
 RUN mkdir -p "${UNV_HOME}/config" "${UNV_HOME}/game" \
     && chown -R unv:unv "${UNV_HOME}"
