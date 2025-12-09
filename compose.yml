@@ -20,6 +20,8 @@ services:
       - unvanq-home:/var/unvanquished-home
     expose:
       - "27960/udp"
+    ports:
+      - "27960:27960/udp"
 
   localxpose:
     build:
