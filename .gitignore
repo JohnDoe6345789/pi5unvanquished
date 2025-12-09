@@ -1,0 +1,13 @@
+# Local runtime data (use the Docker volume instead)
+unvanquished-home/
+
+# Python / node noise
+__pycache__/
+node_modules/
+npm-debug.log*
+pnpm-debug.log*
+yarn-error.log*
+
+# Env files / tokens
+.env
+.env.*

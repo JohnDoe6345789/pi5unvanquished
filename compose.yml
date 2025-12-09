@@ -17,7 +17,9 @@ services:
       # Prevent heartbeats to the Unvanquished master so the server stays unlisted when using LocalXpose
       UNV_DISABLE_MASTERS: "true"
     volumes:
-      - ./unvanquished-home:/var/unvanquished-home
+      - unvanq-home:/var/unvanquished-home
+      # Mount the repo's game directory so configs/rotations shipped in-game are available at runtime
+      - ./game:/opt/unvanquished/game:ro
     expose:
       - "27960/udp"
 
@@ -56,3 +58,6 @@ services:
     # Expose the web dashboard to your LAN
     ports:
       - "8080:8080"
+
+volumes:
+  unvanq-home: {}

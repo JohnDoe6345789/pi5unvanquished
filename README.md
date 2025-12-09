@@ -17,9 +17,7 @@ Run an Unvanquished dedicated server on a Raspberry Pi 5 (or other ARM64 host) w
 - Node 18+ only if you plan to use the CapRover bootstrap script
 
 ## Quick start (local compose)
-1) Create a writable home dir for configs/maps: `unvanquished-home/config`.
-2) (Optional) Drop a `unvanquished-home/config/server.cfg` in there. If missing, the server falls back to `+map plat23`.
-3) Start the stack with your LocalXpose token:
+1) Start the stack with your LocalXpose token:
 ```
 # PowerShell
 $env:LOCALXPOSE_ACCESS_TOKEN="xxxx" ; docker compose up --build -d
@@ -27,7 +25,10 @@ $env:LOCALXPOSE_ACCESS_TOKEN="xxxx" ; docker compose up --build -d
 # Bash
 LOCALXPOSE_ACCESS_TOKEN=xxxx docker compose up --build -d
 ```
-4) Open the dashboard at `http://localhost:8080` and copy the public UDP address to join your server.
+2) On first run, the entrypoint seeds `server.cfg` from `/opt/unvanquished/game/server.cfg` into the Docker volume (`$UNV_HOME/config/server.cfg`) and drops a symlink `$UNV_HOME/game -> /opt/unvanquished/game` so all bundled configs/rotations are visible. Edit `server.cfg` via:
+   - `docker compose run --rm unvanq-server sh -c "vi $UNV_HOME/config/server.cfg"` (or use `nano` if installed), or
+   - `docker cp` a local file into the container: `docker cp ./game/server.cfg unvanq-server:$UNV_HOME/config/server.cfg`
+3) Open the dashboard at `http://localhost:8080` and copy the public UDP address to join your server.
 
 ### LocalXpose config
 - The LocalXpose sidecar runs `loclx tunnel --raw-mode udp --to unvanq-server:27960` and exposes a tiny status API on port 4040 for the dashboard.
@@ -36,7 +37,7 @@ LOCALXPOSE_ACCESS_TOKEN=xxxx docker compose up --build -d
 - This stack keeps the game server off the Unvanquished master list by default (`UNV_DISABLE_MASTERS=true` in `compose.yml`). Set it to `false` if you really want to advertise, or mirror the behavior in your own `server.cfg` with `seta sv_master1 ""` ... `seta sv_master5 ""`.
 
 ## Configuring the game server
-- `UNV_HOME` (default `/var/unvanquished-home`): persisted volume for configs, logs, and extra pk3/dpk content. Mapped from `./unvanquished-home` by compose.
+- `UNV_HOME` (default `/var/unvanquished-home`): persisted Docker volume (`unvanq-home`) for configs, logs, and extra pk3/dpk content.
 - `UNV_PORT` / `UNV_PORT6`: UDP ports the server binds inside the container (default 27960).
 - `UNV_SERVER_CFG`: Filename inside `config/` to execute on start (`server.cfg` by default).
 - Build args: override `UNV_VERSION` and `UNV_ARCH` in `docker compose build` if you need a different upstream release/architecture.
@@ -61,5 +62,5 @@ map plat23
 
 ## Troubleshooting
 - No LocalXpose URL? Ensure `LOCALXPOSE_ACCESS_TOKEN` is set and the LocalXpose container can reach `unvanq-server`; check `docker compose logs localxpose`.
-- Custom config ignored? Verify `unvanquished-home/config/server.cfg` exists and matches `UNV_SERVER_CFG`; otherwise the entrypoint just runs `+map plat23`.
+- Custom config ignored? Verify the Docker volume has `$UNV_HOME/config/server.cfg` and it matches `UNV_SERVER_CFG`; otherwise the entrypoint just runs `+map plat23`.
 - Changed version/arch? Rebuild the image with new `UNV_VERSION`/`UNV_ARCH` build args before restarting the stack.

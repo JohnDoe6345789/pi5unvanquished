@@ -3,6 +3,13 @@ set -e
 
 set --
 
+mkdir -p "${UNV_HOME}/config"
+
+# Expose packaged game configs in the writable home for convenience
+if [ ! -e "${UNV_HOME}/game" ]; then
+  ln -s /opt/unvanquished/game "${UNV_HOME}/game"
+fi
+
 if [ -n "${UNV_HOME}" ]; then
   set -- "$@" -homepath "${UNV_HOME}"
 fi
@@ -22,6 +29,12 @@ if [ "${UNV_DISABLE_MASTERS}" = "1" ] || [ "${UNV_DISABLE_MASTERS}" = "true" ]; 
 fi
 
 CFG_PATH="${UNV_HOME}/config/${UNV_SERVER_CFG}"
+DEFAULT_CFG="/opt/unvanquished/game/${UNV_SERVER_CFG}"
+
+if [ ! -f "${CFG_PATH}" ] && [ -f "${DEFAULT_CFG}" ]; then
+  echo "Seeding default config to ${CFG_PATH}"
+  cp "${DEFAULT_CFG}" "${CFG_PATH}"
+fi
 
 if [ -f "${CFG_PATH}" ]; then
   exec /opt/unvanquished/daemonded "$@" +exec "${UNV_SERVER_CFG}"
