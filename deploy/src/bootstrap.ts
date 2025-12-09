@@ -12,7 +12,7 @@ const CAPROVER_PASSWORD = process.env.CAPROVER_PASSWORD || "";
 const CAPROVER_EMAIL = process.env.CAPROVER_EMAIL || "captain@root";
 
 const PROJECT_NAME = process.env.UNV_PROJECT_NAME || "unvanquished";
-const COMPOSE_FILE = process.env.COMPOSE_FILE || "compose.yml";
+const COMPOSE_FILE = process.env.COMPOSE_FILE || "../compose.yml";
 
 if (!CAPROVER_PASSWORD) {
   console.error("ERROR: CAPROVER_PASSWORD not set.");
