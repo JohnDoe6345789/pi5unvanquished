@@ -1,8 +1,10 @@
+import json
 import os
 import socket
+from pathlib import Path
 from typing import Any, Dict, List
 import requests
-from flask import Flask, jsonify, render_template
+from flask import Flask, jsonify, render_template, request
 
 app = Flask(__name__)
 
@@ -14,6 +16,42 @@ LOCALXPOSE_STATUS_URL = os.environ.get(
     "LOCALXPOSE_STATUS_URL",
     "http://unvanq-localxpose:4040/status",
 )
+
+PANEL_ORDER_FILE = Path(os.environ.get("PANEL_ORDER_FILE", "/data/panel_order.json"))
+DEFAULT_PANEL_ORDER = ["server", "localxpose"]
+ALLOWED_PANELS = set(DEFAULT_PANEL_ORDER)
+
+
+def normalize_panel_order(order: List[str]) -> List[str]:
+    """Remove unknown/duplicate panel ids and ensure defaults are present."""
+    cleaned: List[str] = []
+    for item in order:
+        if isinstance(item, str) and item in ALLOWED_PANELS and item not in cleaned:
+            cleaned.append(item)
+    for default in DEFAULT_PANEL_ORDER:
+        if default not in cleaned:
+            cleaned.append(default)
+    return cleaned
+
+
+def load_panel_order() -> List[str]:
+    if not PANEL_ORDER_FILE.exists():
+        return DEFAULT_PANEL_ORDER
+
+    try:
+        with PANEL_ORDER_FILE.open("r", encoding="utf-8") as fp:
+            data = json.load(fp)
+        if isinstance(data, list):
+            return normalize_panel_order(data)
+    except Exception:
+        pass
+    return DEFAULT_PANEL_ORDER
+
+
+def save_panel_order(order: List[str]) -> None:
+    PANEL_ORDER_FILE.parent.mkdir(parents=True, exist_ok=True)
+    with PANEL_ORDER_FILE.open("w", encoding="utf-8") as fp:
+        json.dump(order, fp)
 
 # ----------------------------------------------------
 # Unvanquished Server Query
@@ -145,6 +183,24 @@ def api_status():
 @app.route("/api/localxpose_status")
 def api_localxpose():
     return jsonify(query_localxpose_status())
+
+@app.route("/api/panel_order", methods=["GET", "POST"])
+def api_panel_order():
+    if request.method == "GET":
+        return jsonify({"order": load_panel_order()})
+
+    body = request.get_json(silent=True) or {}
+    requested = body.get("order")
+    if not isinstance(requested, list):
+        return jsonify({"error": "order must be a list"}), 400
+
+    normalized = normalize_panel_order(requested)
+    try:
+        save_panel_order(normalized)
+    except Exception as exc:
+        return jsonify({"error": str(exc)}), 500
+
+    return jsonify({"order": normalized})
 
 
 if __name__ == "__main__":

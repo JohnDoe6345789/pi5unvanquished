@@ -56,6 +56,9 @@ services:
     # Expose the web dashboard to your LAN
     ports:
       - "8080:8080"
+    volumes:
+      - webui-dashboard:/data
 
 volumes:
   unvanq-home: {}
+  webui-dashboard: {}

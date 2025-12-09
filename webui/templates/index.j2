@@ -70,6 +70,23 @@ const {
   TableBody, ThemeProvider, createTheme, CssBaseline, Container
 } = MaterialUI;
 
+const DEFAULT_PANEL_ORDER = ["server", "localxpose"];
+
+function normalizePanelOrder(order) {
+  const cleaned = [];
+  if (Array.isArray(order)) {
+    order.forEach(item => {
+      if (typeof item === "string" && DEFAULT_PANEL_ORDER.includes(item) && !cleaned.includes(item)) {
+        cleaned.push(item);
+      }
+    });
+  }
+  DEFAULT_PANEL_ORDER.forEach(item => {
+    if (!cleaned.includes(item)) cleaned.push(item);
+  });
+  return cleaned;
+}
+
 function useServerData() {
   const [status, setStatus] = React.useState({loading:true, error:"", data:null});
   const [lx, setLx] = React.useState({loading:true, error:"", data:null});
@@ -128,21 +145,59 @@ function App() {
   const lxUrl = lxData.public_url || "N/A";
   const lxLog = lxData.log_tail || [];
 
-  const [panelOrder, setPanelOrder] = React.useState(["server", "localxpose"]);
+  const [panelOrder, setPanelOrder] = React.useState(DEFAULT_PANEL_ORDER);
+  const [panelOrderError, setPanelOrderError] = React.useState("");
+  const [panelOrderSaving, setPanelOrderSaving] = React.useState(false);
   const localHost = window.location.hostname || "localhost";
   const fallbackEndpoint = `${localHost}:27960`;
   const fallbackConnect = `+connect ${fallbackEndpoint}`;
 
+  React.useEffect(() => {
+    let dead = false;
+    async function fetchPanelOrder() {
+      try {
+        const r = await fetch("/api/panel_order");
+        const j = await r.json();
+        if (!dead && Array.isArray(j.order)) {
+          setPanelOrder(normalizePanelOrder(j.order));
+        }
+        if (!dead && j.error) setPanelOrderError(j.error);
+      } catch(e) {
+        if (!dead) setPanelOrderError(String(e));
+      }
+    }
+    fetchPanelOrder();
+    return () => { dead = true; };
+  }, []);
+
+  const persistPanelOrder = (nextOrder) => {
+    const normalized = normalizePanelOrder(nextOrder);
+    setPanelOrder(normalized);
+    setPanelOrderSaving(true);
+    setPanelOrderError("");
+    fetch("/api/panel_order", {
+      method: "POST",
+      headers: {"Content-Type":"application/json"},
+      body: JSON.stringify({order: normalized})
+    })
+      .then(async resp => {
+        const body = await resp.json().catch(() => ({}));
+        if (!resp.ok) throw new Error(body.error || "Failed to save panel order");
+        if (Array.isArray(body.order)) setPanelOrder(normalizePanelOrder(body.order));
+        if (body.error) setPanelOrderError(body.error);
+      })
+      .catch(err => setPanelOrderError(String(err)))
+      .finally(() => setPanelOrderSaving(false));
+  };
+
   const movePanel = (id, dir) => {
-    setPanelOrder(prev => {
-      const idx = prev.indexOf(id);
-      if (idx === -1) return prev;
-      const swapWith = dir === "up" ? idx - 1 : idx + 1;
-      if (swapWith < 0 || swapWith >= prev.length) return prev;
-      const next = [...prev];
-      [next[idx], next[swapWith]] = [next[swapWith], next[idx]];
-      return next;
-    });
+    const idx = panelOrder.indexOf(id);
+    if (idx === -1) return;
+    const swapWith = dir === "up" ? idx - 1 : idx + 1;
+    if (swapWith < 0 || swapWith >= panelOrder.length) return;
+    const next = [...panelOrder];
+    [next[idx], next[swapWith]] = [next[swapWith], next[idx]];
+    persistPanelOrder(next);
   };
 
   const theme = createTheme({
@@ -388,6 +443,17 @@ function App() {
               </Stack>
             </Box>
           </Box>
+
+          {panelOrderError && (
+            <Typography color="warning.main" sx={{mb:1}}>
+              Panel order not saved: {panelOrderError}
+            </Typography>
+          )}
+          {panelOrderSaving && !panelOrderError && (
+            <Typography variant="caption" color="text.secondary" sx={{mb:1, display:"block"}}>
+              Saving panel order…
+            </Typography>
+          )}
 
           <Stack spacing={2}>
 
