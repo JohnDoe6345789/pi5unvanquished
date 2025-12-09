@@ -22,18 +22,39 @@ services:
     image: ngrok/ngrok:latest
     container_name: unvanq-ngrok
     restart: unless-stopped
-
-    # Replace with your ngrok token
     environment:
+      # Set this in your shell or .env: NGROK_AUTHTOKEN=xxxx
       NGROK_AUTHTOKEN: "${NGROK_AUTHTOKEN}"
-
-    # Ngrok config injected directly (no config file needed)
     command:
       - "tunnel"
       - "unv"
       - "--proto=udp"
       - "--addr=unvanq-server:27960"
-
-    # Optional: view ngrok web UI on http://localhost:4040
+      # If you also want a web UI on host, uncomment:
+      # - "--log=stdout"
+    expose:
+      # Ngrok's local API for the dashboard container to query
+      - "4040/tcp"
+    # If you want to view ngrok dashboard from host, uncomment:
     #ports:
     #  - "4040:4040"
+
+  webui:
+    build:
+      context: ./webui
+      dockerfile: Dockerfile
+    container_name: unvanq-webui
+    restart: unless-stopped
+    environment:
+      # Where the Flask app should query the game server
+      UNV_SERVER_HOST: unvanq-server
+      UNV_SERVER_PORT: 27960
+
+      # Ngrok API inside the Docker network
+      NGROK_API_URL: http://unvanq-ngrok:4040/api/tunnels
+    depends_on:
+      - unvanq-server
+      - ngrok
+    # Expose the web dashboard to your LAN
+    ports:
+      - "8080:8080"
