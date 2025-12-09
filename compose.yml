@@ -1,0 +1,22 @@
+services:
+  unvanq-server:
+    build:
+      context: .
+      dockerfile: Dockerfile
+      args:
+        UNV_VERSION: "0.55.5"
+        UNV_ARCH: "linux-arm64"
+    container_name: unvanq-server
+    restart: unless-stopped
+
+    environment:
+      UNV_HOME: /var/unvanquished-home
+      UNV_PORT: 27960
+      UNV_PORT6: 27960
+      UNV_SERVER_CFG: server.cfg
+
+    ports:
+      - "27960:27960/udp"
+
+    volumes:
+      - ./unvanquished-home:/var/unvanquished-home
