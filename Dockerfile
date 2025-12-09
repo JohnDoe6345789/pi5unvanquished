@@ -95,7 +95,8 @@ if [ -f "${CFG_PATH}" ]; then
     ' "${CFG_PATH}"
   )
   if [ -n "${cfgValue}" ]; then
-    MAP_CONFIGS_DIR="${cfgValue}"
+    # strip CR/whitespace that can sneak in when server.cfg has Windows newlines
+    MAP_CONFIGS_DIR=$(printf '%s' "${cfgValue}" | tr -d '\r' | xargs)
   fi
 fi
 
