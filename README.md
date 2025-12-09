@@ -33,6 +33,7 @@ LOCALXPOSE_ACCESS_TOKEN=xxxx docker compose up --build -d
 - The LocalXpose sidecar runs `loclx tunnel --raw-mode udp --to unvanq-server:27960` and exposes a tiny status API on port 4040 for the dashboard.
 - Set `LOCALXPOSE_REGION`, `LOCALXPOSE_PORT`, or `LOCALXPOSE_RESERVED_ENDPOINT` in your environment if you need a specific region/endpoint.
 - The container expects `LOCALXPOSE_ACCESS_TOKEN` and will report errors via `docker compose logs localxpose` if the tunnel fails to start.
+- This stack keeps the game server off the Unvanquished master list by default (`UNV_DISABLE_MASTERS=true` in `compose.yml`). Set it to `false` if you really want to advertise, or mirror the behavior in your own `server.cfg` with `seta sv_master1 ""` ... `seta sv_master5 ""`.
 
 ## Configuring the game server
 - `UNV_HOME` (default `/var/unvanquished-home`): persisted volume for configs, logs, and extra pk3/dpk content. Mapped from `./unvanquished-home` by compose.

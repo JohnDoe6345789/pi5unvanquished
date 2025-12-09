@@ -15,6 +15,12 @@ if [ -n "${UNV_PORT6}" ]; then
   set -- "$@" -set net_port6 "${UNV_PORT6}"
 fi
 
+if [ "${UNV_DISABLE_MASTERS}" = "1" ] || [ "${UNV_DISABLE_MASTERS}" = "true" ]; then
+  for i in 1 2 3 4 5; do
+    set -- "$@" -set "sv_master${i}" ""
+  done
+fi
+
 CFG_PATH="${UNV_HOME}/config/${UNV_SERVER_CFG}"
 
 if [ -f "${CFG_PATH}" ]; then

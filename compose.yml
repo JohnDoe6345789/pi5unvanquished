@@ -13,6 +13,8 @@ services:
       UNV_PORT: 27960
       UNV_PORT6: 27960
       UNV_SERVER_CFG: server.cfg
+      # Prevent heartbeats to the Unvanquished master so the server stays unlisted when using LocalXpose
+      UNV_DISABLE_MASTERS: "true"
     volumes:
       - ./unvanquished-home:/var/unvanquished-home
     expose:
