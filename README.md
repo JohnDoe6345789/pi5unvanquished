@@ -10,6 +10,7 @@ Run an Unvanquished dedicated server on a Raspberry Pi 5 (or other ARM64 host) w
 - `deploy/src/bootstrap.ts`: CapRover automation that turns `compose.yml` into CapRover apps and deploys them.
 - `pkg/`: Upstream `.dpk` assets you can copy into your server home if you want to preload maps/content.
 - `daemon`, `daemonded`, `pkg/`, and `game/` are prebundled for ARM64; no download needed at build time.
+- `docs/daemon-engine.md`: Notes on the bundled Daemon binaries and how the entrypoint wires them up.
 
 ## Requirements
 - Docker and Docker Compose v2 (images are ARM64; Docker Desktop/buildx can run them on AMD64 via binfmt, or build on an ARM64 host)
