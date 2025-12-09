@@ -152,12 +152,19 @@ HTML_TEMPLATE = """
 <link rel="stylesheet"
  href="https://fonts.googleapis.com/icon?family=Material+Icons"/>
 
-<script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
-<script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
-<script crossorigin src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<script crossorigin="anonymous"
+ integrity="sha384-DGyLxAyjq0f9SPpVevD6IgztCFlnMF6oW/XQGmfe+IsZ8TqEiDrcHkMLKI6fiB/Z"
+ src="https://unpkg.com/react@18.3.1/umd/react.production.min.js"></script>
+<script crossorigin="anonymous"
+ integrity="sha384-gTGxhz21lVGYNMcdJOyq01Edg0jhn/c22nsx0kyqP0TxaV5WVdsSH1fSDUf5YJj1"
+ src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.production.min.js"></script>
+<script crossorigin="anonymous"
+ integrity="sha384-gfoIoghgrQ+acOP1IAci7PIH0wjwxDVkjgSczIHAcAGEWKu6Ztq1HaNa41oW95ya"
+ src="https://unpkg.com/@babel/standalone@7.26.0/babel.min.js"></script>
 
-<script crossorigin
- src="https://unpkg.com/@mui/material@5.18.0/umd/material-ui.development.js"></script>
+<script crossorigin="anonymous"
+ integrity="sha384-C1jZRQpcgcAFclz/eCOntp9Rs1moYZ1axTf9rL7aS3DQMSW3XESRolQKVUey9T3C"
+ src="https://unpkg.com/@mui/material@5.15.14/umd/material-ui.production.min.js"></script>
 
 <script>
 window.API_STATUS_URL = "/api/status";

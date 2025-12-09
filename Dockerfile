@@ -1,7 +1,7 @@
 # Dockerfile
 FROM debian:bookworm-slim
 
-# Version from upstream universal zip; adjust when they bump. :contentReference[oaicite:1]{index=1}
+# Version from upstream universal zip; adjust when they bump.
 ARG UNV_VERSION=0.55.5
 ARG UNV_ARCH=linux-arm64
 
@@ -33,7 +33,7 @@ RUN useradd -m -d /home/unv -s /bin/bash unv \
 
 WORKDIR /opt/unvanquished
 
-# Universal zip contains linux-arm64.zip for ARM64. :contentReference[oaicite:2]{index=2}
+# Universal zip contains linux-arm64.zip for ARM64.
 RUN curl -L -o "unvanquished_${UNV_VERSION}.zip" \
       "https://downloads.sourceforge.net/project/unvanquished/v${UNV_VERSION}/unvanquished_${UNV_VERSION}.zip" \
     && unzip "unvanquished_${UNV_VERSION}.zip" \

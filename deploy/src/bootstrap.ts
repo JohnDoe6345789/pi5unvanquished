@@ -98,19 +98,31 @@ function deriveCommand(svc: any): string | undefined {
 
 function derivePortMapping(svc: any): PortMapping[] {
   const out: PortMapping[] = [];
+  const add = (host: string | undefined, cont: string | undefined) => {
+    if (!cont) return;
+    const hostPort = (host || cont).split("/")[0];
+    const containerPort = cont.split("/")[0];
+    out.push({ hostPort, containerPort });
+  };
+
   const ports = svc.ports || [];
   for (const p of ports) {
     if (typeof p === "string") {
-      // "8080:8080"
+      // "8080:8080" or "8080:8080/udp"
       const [host, cont] = p.split(":");
-      if (host && cont) {
-        out.push({
-          hostPort: host.split("/")[0],
-          containerPort: cont.split("/")[0]
-        });
-      }
+      if (host && cont) add(host, cont);
     }
   }
+
+  // If no explicit host bindings were provided, fall back to "expose"
+  // to at least surface container ports in CapRover.
+  if (out.length === 0 && Array.isArray(svc.expose)) {
+    for (const ex of svc.expose) {
+      if (typeof ex === "string") add(undefined, ex);
+      else if (typeof ex === "number") add(undefined, String(ex));
+    }
+  }
+
   return out;
 }
 
@@ -138,7 +150,7 @@ async function main() {
   }
 
   if (!projectId) {
-    console.log(`Project "${PROJECT_NAME}" does not exist — creating…`);
+    console.log(`Project "${PROJECT_NAME}" does not exist - creating...`);
     const created = await cap.createProject({ name: PROJECT_NAME });
     projectId = created.projectId;
     console.log("Created project with ID:", projectId);
@@ -159,7 +171,7 @@ async function main() {
   }
 
   // ------------------------------------------------------------------
-  // Step 3: For each service → create/update app
+  // Step 3: For each service -> create/update app
   // ------------------------------------------------------------------
   for (const svcName of serviceNames) {
     const svc = services[svcName];
@@ -206,7 +218,7 @@ async function main() {
     }
 
     // Send to CapRover API
-    console.log(`Deploying/Updating app "${svcName}"…`);
+    console.log(`Deploying/Updating app "${svcName}"...`);
 
     await cap.updateAppDefinition({
       appDefinitions: [appDef]
