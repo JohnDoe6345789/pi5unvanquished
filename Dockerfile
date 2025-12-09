@@ -74,6 +74,51 @@ if [ -n "${UNV_HOME}" ]; then
   set -- "$@" -homepath "${UNV_HOME}"
 fi
 
+CFG_PATH="${UNV_HOME}/config/${UNV_SERVER_CFG}"
+DEFAULT_CFG="/opt/unvanquished/game/${UNV_SERVER_CFG}"
+
+if [ ! -f "${CFG_PATH}" ] && [ -f "${DEFAULT_CFG}" ]; then
+  echo "Seeding default config to ${CFG_PATH}"
+  cp "${DEFAULT_CFG}" "${CFG_PATH}"
+fi
+
+# Detect map config directory from the server config (defaults to \"map\")
+MAP_CONFIGS_DIR="map"
+if [ -f "${CFG_PATH}" ]; then
+  cfgValue=$(
+    awk '
+      /^[[:space:]]*seta?[[:space:]]+g_mapConfigs[[:space:]]+/ {
+        gsub(/\"/, "", $3);
+        print $3;
+        exit;
+      }
+    ' "${CFG_PATH}"
+  )
+  if [ -n "${cfgValue}" ]; then
+    MAP_CONFIGS_DIR="${cfgValue}"
+  fi
+fi
+
+# Seed map config scripts into <homepath>/config so exec -f map/... can find them
+MAP_SRC="/opt/unvanquished/game/${MAP_CONFIGS_DIR}"
+MAP_DST="${UNV_HOME}/config/${MAP_CONFIGS_DIR}"
+if [ -d "${MAP_SRC}" ]; then
+  if [ ! -d "${MAP_DST}" ] || [ -z "$(ls -A "${MAP_DST}" 2>/dev/null)" ]; then
+    echo "Seeding map configs to ${MAP_DST}"
+    mkdir -p "${MAP_DST}"
+    cp -a "${MAP_SRC}/." "${MAP_DST}/"
+  fi
+fi
+
+# Helpers referenced by map configs (for example addbots.cfg)
+for helper in addbots.cfg autogear.cfg; do
+  SRC="/opt/unvanquished/game/${helper}"
+  DST="${UNV_HOME}/config/${helper}"
+  if [ -f "${SRC}" ] && [ ! -f "${DST}" ]; then
+    cp "${SRC}" "${DST}"
+  fi
+done
+
 if [ -n "${UNV_PORT}" ]; then
   set -- "$@" -set net_port "${UNV_PORT}"
 fi
@@ -86,14 +131,6 @@ if [ "${UNV_DISABLE_MASTERS}" = "1" ] || [ "${UNV_DISABLE_MASTERS}" = "true" ]; 
   for i in 1 2 3 4 5; do
     set -- "$@" -set "sv_master${i}" ""
   done
-fi
-
-CFG_PATH="${UNV_HOME}/config/${UNV_SERVER_CFG}"
-DEFAULT_CFG="/opt/unvanquished/game/${UNV_SERVER_CFG}"
-
-if [ ! -f "${CFG_PATH}" ] && [ -f "${DEFAULT_CFG}" ]; then
-  echo "Seeding default config to ${CFG_PATH}"
-  cp "${DEFAULT_CFG}" "${CFG_PATH}"
 fi
 
 NEEDS_MAP_FALLBACK=true
