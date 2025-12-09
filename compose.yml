@@ -18,8 +18,6 @@ services:
       UNV_DISABLE_MASTERS: "true"
     volumes:
       - unvanq-home:/var/unvanquished-home
-      # Mount the repo's game directory so configs/rotations shipped in-game are available at runtime
-      - ./game:/opt/unvanquished/game:ro
     expose:
       - "27960/udp"
 

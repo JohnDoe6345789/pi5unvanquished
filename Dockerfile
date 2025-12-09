@@ -48,9 +48,13 @@ set --
 
 mkdir -p "${UNV_HOME}/config"
 
-# Expose packaged game configs in the writable home for convenience
-if [ ! -e "${UNV_HOME}/game" ]; then
-  ln -s /opt/unvanquished/game "${UNV_HOME}/game"
+# Seed packaged game configs into the writable home so containers don't need a bind mount
+if [ -L "${UNV_HOME}/game" ]; then
+  rm -f "${UNV_HOME}/game"
+fi
+if [ ! -d "${UNV_HOME}/game" ]; then
+  echo "Copying default game config bundle into ${UNV_HOME}/game"
+  cp -a /opt/unvanquished/game "${UNV_HOME}/"
 fi
 
 if [ -n "${UNV_HOME}" ]; then
