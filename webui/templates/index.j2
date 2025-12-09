@@ -72,6 +72,85 @@ const {
 
 const DEFAULT_PANEL_ORDER = ["server", "localxpose"];
 
+// Parse Unvanquished-style color codes (e.g., ^1 red, ^7 white, ^xrrggbb hex) into React spans.
+function ColorName({name}) {
+  const palette = {
+    "0": "#000000",
+    "1": "#ff3b30",
+    "2": "#34c759",
+    "3": "#ffcc00",
+    "4": "#0a84ff",
+    "5": "#64d2ff",
+    "6": "#bf5af2",
+    "7": "#f2f2f7",
+    "8": "#ff9f0a",
+    "9": "#8e8e93",
+  };
+
+  const segments = [];
+  let current = "";
+  let color = palette["7"];
+
+  const flush = () => {
+    if (current) {
+      segments.push({text: current, color});
+      current = "";
+    }
+  };
+
+  for (let i = 0; i < name.length; i++) {
+    const ch = name[i];
+    if (ch === "^" && i + 1 < name.length) {
+      const code = name[i + 1];
+      // literal caret ^^
+      if (code === "^") {
+        current += "^";
+        i += 1;
+        continue;
+      }
+      // reset code (^* or ^7 fallback)
+      if (code === "*") {
+        flush();
+        color = palette["7"];
+        i += 1;
+        continue;
+      }
+      // hex code ^xrrggbb
+      if (code.toLowerCase() === "x" && i + 7 < name.length) {
+        const hex = name.slice(i + 2, i + 8);
+        if (/^[0-9a-fA-F]{6}$/.test(hex)) {
+          flush();
+          color = `#${hex.toLowerCase()}`;
+          i += 7;
+          continue;
+        }
+      }
+      // digit palette ^0-^9
+      if (palette[code]) {
+        flush();
+        color = palette[code];
+        i += 1;
+        continue;
+      }
+      // Unknown code: skip the caret and code
+      i += 1;
+      continue;
+    }
+    current += ch;
+  }
+  flush();
+
+  return (
+    <span>
+      {segments.map((seg, idx) => (
+        <span key={idx} style={{color: seg.color, fontWeight: 600}}>
+          {seg.text}
+        </span>
+      ))}
+    </span>
+  );
+}
+
 function normalizePanelOrder(order) {
   const cleaned = [];
   if (Array.isArray(order)) {
@@ -297,9 +376,14 @@ function App() {
               </Box>
 
               {players.length > 0 && (
-                <Table size="small">
+                <Table size="small" sx={{
+                  bgcolor:"rgba(255,255,255,0.02)",
+                  borderRadius:1,
+                  overflow:"hidden",
+                  border:"1px solid rgba(255,255,255,0.08)"
+                }}>
                   <TableHead>
-                    <TableRow>
+                    <TableRow sx={{"& th": {borderBottomColor:"rgba(255,255,255,0.08)", color:"#cbd5e1"}}}>
                       <TableCell>#</TableCell>
                       <TableCell>Name</TableCell>
                       <TableCell>Score</TableCell>
@@ -308,9 +392,15 @@ function App() {
                   </TableHead>
                   <TableBody>
                     {players.map((p,i) => (
-                      <TableRow key={i}>
+                      <TableRow
+                        key={i}
+                        sx={{
+                          "&:nth-of-type(odd)": {backgroundColor:"rgba(255,255,255,0.02)"},
+                          "& td": {borderBottomColor:"rgba(255,255,255,0.05)"}
+                        }}
+                      >
                         <TableCell>{i+1}</TableCell>
-                        <TableCell>{p.name}</TableCell>
+                        <TableCell><ColorName name={p.name}/></TableCell>
                         <TableCell>{p.score}</TableCell>
                         <TableCell>{p.ping}</TableCell>
                       </TableRow>
